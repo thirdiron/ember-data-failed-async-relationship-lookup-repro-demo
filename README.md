@@ -9,7 +9,7 @@ to `.get` the async relationship continue to return the original
 failing promise (with error) due to computed property value caching
 and state held inside of the relationship state object.
 
-Step through the breakpoints of this small app to see the behavior
+Step through the breakpoints of the index route of this small app to see the behavior
 in action.
 
 
