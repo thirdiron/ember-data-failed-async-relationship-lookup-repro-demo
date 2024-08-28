@@ -1,18 +1,21 @@
 import Ember from 'ember';
-
+import $ from 'jquery';
 var relatedLookupErrorCount = 0;
+import Route from "@ember/routing/route";
+import { inject as service } from '@ember/service';
 
 function performFix() {
   //  Simulate fixing the issue by posting to an API
   //  endpoint that makes the relatedThings lookup stop
   //  failing
-  return Ember.$.ajax('/api/fix', { method: 'post'})
+  return $.ajax('/api/fix', { method: 'post'})
     .then(() => {
       debugger;
     });
 }
 
-export default Ember.Route.extend({
+export default class IndexRoute extends Route {
+  @service store;
 
   model() {
     return this.store.find('thing', 1)
@@ -31,7 +34,7 @@ export default Ember.Route.extend({
         if (relatedLookupErrorCount > 1) {
           console.log('The .get against the relationship "failed" again, but the back-end should be fixed.  Verify backend works to isolate issue to caching');
 
-          return Ember.$.ajax('/api/related-things')
+          return $.ajax('/api/related-things')
             .then((relThingsResponse) => {
               console.log('relThingsResponse.data[0].id == ' + relThingsResponse.data[0].id);
               console.log('The .get fails, and yet the endpoint works');
@@ -43,19 +46,17 @@ export default Ember.Route.extend({
         debugger;
         throw err;
       });
-  },
-
-  actions: {
-    error(err, transition)  {
-      if (relatedLookupErrorCount > 1) {
-        throw new Error("We should have only seen one error.  Break the cycle so we don't infinitely loop");
-      }
-      // Ok, we got an error looking up related data.
-      // Perform some actions to remedy the problem
-      // then retry the transition
-      performFix().then(() => {
-        transition.retry();
-      });
-    }
   }
-});
+
+  error(err, transition)  {
+    if (relatedLookupErrorCount > 1) {
+      throw new Error("We should have only seen one error.  Break the cycle so we don't infinitely loop");
+    }
+    // Ok, we got an error looking up related data.
+    // Perform some actions to remedy the problem
+    // then retry the transition
+    performFix().then(() => {
+      transition.retry();
+    });
+  }
+}
