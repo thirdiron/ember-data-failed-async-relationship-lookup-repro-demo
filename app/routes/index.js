@@ -1,8 +1,8 @@
-import Ember from 'ember';
 import $ from 'jquery';
 var relatedLookupErrorCount = 0;
 import Route from "@ember/routing/route";
 import { inject as service } from '@ember/service';
+import { action } from '@ember/object';
 
 function performFix() {
   //  Simulate fixing the issue by posting to an API
@@ -48,6 +48,7 @@ export default class IndexRoute extends Route {
       });
   }
 
+  @action
   error(err, transition)  {
     if (relatedLookupErrorCount > 1) {
       throw new Error("We should have only seen one error.  Break the cycle so we don't infinitely loop");
